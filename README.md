@@ -80,12 +80,6 @@ docker compose up --build -d
 
 ![Data Flow](public/images/flow_diagram.png)
 
-// ... existing content ...
-
-## Data Flow
-
-![Data Flow](public/images/flow_diagram.png)
-
 ### Initial Request Flow
 1. User accesses the frontend application through their browser
 2. The web application presents a form requesting Figma credentials
