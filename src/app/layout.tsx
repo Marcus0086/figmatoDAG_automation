@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+
+import { GraphProvider } from "@/app/store/graphStore";
+
+import { Toaster } from "@/components/ui/sonner";
+
 import "./globals.css";
 
 const geistSans = localFont({
@@ -28,7 +33,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <GraphProvider>{children}</GraphProvider>
+        <Toaster />
       </body>
     </html>
   );
