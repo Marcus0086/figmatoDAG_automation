@@ -2,6 +2,9 @@
 
 This is a project that automates the process of creating a DAG from a Figma file and then executing the DAG to take screenshots of the nodes in the browser using figma prototype.
 
+<img width="1710" alt="image" src="https://github.com/user-attachments/assets/b6dc6034-0fab-4ecd-8ba9-90e3e5f8c95f">
+
+
 ## Table of Contents
 
 - [Architecture](#architecture)
