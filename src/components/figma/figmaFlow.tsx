@@ -82,13 +82,12 @@ const FigmaFlow = () => {
           },
         },
       });
-      resetSelection();
     } else if (response.error) {
-      toast.error(response.error as string, {
-        description: "Please try again",
+      toast.error("Error running automation", {
+        description: response.error as string,
       });
-      resetSelection();
     }
+    resetSelection();
   };
 
   const resetSelection = () => {

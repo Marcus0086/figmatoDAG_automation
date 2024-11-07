@@ -7,6 +7,12 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+class AutomationError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 class Automation {
   private static instance: Automation | null = null;
   private browser: Browser | null = null;
@@ -66,11 +72,11 @@ class Automation {
 
   public async executeGraph(graph: Graph, startNode: string, endNode: string) {
     if (!this.page) {
-      throw new Error("Page not initialized");
+      throw new AutomationError("Page not initialized");
     }
 
     if (!this.page.url().includes("figma.com/design")) {
-      throw new Error("Not on figma design page");
+      throw new AutomationError("Not on figma design page");
     }
 
     const figmaUrl = this.page.url();
@@ -85,7 +91,7 @@ class Automation {
     const path = this.findPath(graph, startNode, endNode);
     if (!path) {
       await this.navigateTo(figmaUrl);
-      throw new Error("No path found");
+      throw new AutomationError("No path found");
     }
 
     const screenshots: string[] = [];
@@ -96,7 +102,9 @@ class Automation {
       const edge = this.findEdge(graph, path[i], path[i + 1]);
       if (!edge || !currentNode || !nextNode) {
         await this.navigateTo(figmaUrl);
-        throw new Error(`Edge not found between ${path[i]} and ${path[i + 1]}`);
+        throw new AutomationError(
+          `Edge not found between ${path[i]} and ${path[i + 1]}`
+        );
       }
 
       url.searchParams.set("node-id", nextNode.id);
@@ -168,4 +176,4 @@ class Automation {
   }
 }
 
-export { Automation };
+export { Automation, AutomationError };

@@ -1,12 +1,11 @@
 "use server";
 
-import { Automation } from "@/lib/automation";
+import { Automation, AutomationError } from "@/lib/automation";
 import { Graph } from "@/lib/graph";
 interface BrowserResponse {
   success: boolean;
   error?: unknown;
 }
-
 interface AutomationResponse extends BrowserResponse {
   screenshots?: string[];
 }
@@ -30,7 +29,10 @@ const startAutomation = async (graphString: string, startNode: string, endNode: 
     return { success: true, screenshots };
   } catch (error) {
     console.error(error);
-    return { success: false, error: error };
+    if (error instanceof AutomationError) {
+      return { success: false, error: error.message };
+    } 
+    return { success: false, error: "Error running automation" };
   }
 }
 
