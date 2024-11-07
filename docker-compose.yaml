@@ -1,0 +1,15 @@
+services:
+  figmatodagautomation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - 6080:6080
+      - 3000:3000
+    volumes:
+      - figmatodagautomation:/app/public
+volumes:
+  figmatodagautomation:
+    driver: local
