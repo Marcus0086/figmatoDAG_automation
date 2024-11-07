@@ -1,4 +1,4 @@
-import { FigmaFlow } from "@/components/figma";
+import FigmaFlow from "@/components/figma/figmaFlow";
 import Browser from "@/components/browser";
 const Home = () => {
   return (
