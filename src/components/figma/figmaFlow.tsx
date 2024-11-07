@@ -83,6 +83,11 @@ const FigmaFlow = () => {
         },
       });
       resetSelection();
+    } else if (response.error) {
+      toast.error(response.error as string, {
+        description: "Please try again",
+      });
+      resetSelection();
     }
   };
 
@@ -145,9 +150,14 @@ const FigmaFlow = () => {
       {screenshots.length ? (
         <div className="flex flex-wrap items-center gap-2">
           {screenshots.map((screenshot, index) => (
-            <Link href={`/images/${screenshot}`} key={index}>
+            <Link
+              href={`/api/images/${screenshot}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              key={index}
+            >
               <Image
-                src={`/images/${screenshot}`}
+                src={`/api/images/${screenshot}`}
                 alt="Screenshot"
                 width={100}
                 height={120}
