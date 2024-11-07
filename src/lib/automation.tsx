@@ -84,6 +84,7 @@ class Automation {
 
     const path = this.findPath(graph, startNode, endNode);
     if (!path) {
+      await this.navigateTo(figmaUrl);
       throw new Error("No path found");
     }
 
@@ -94,6 +95,7 @@ class Automation {
       const nextNode = graph.nodes.get(path[i + 1]);
       const edge = this.findEdge(graph, path[i], path[i + 1]);
       if (!edge || !currentNode || !nextNode) {
+        await this.navigateTo(figmaUrl);
         throw new Error(`Edge not found between ${path[i]} and ${path[i + 1]}`);
       }
 
