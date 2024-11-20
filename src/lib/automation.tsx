@@ -56,7 +56,9 @@ class Automation {
 
       this.page = await this.context.newPage();
       this.page.setDefaultNavigationTimeout(60000);
-      await this.page.goto("https://www.google.com");
+      await this.page.goto(
+        "https://www.figma.com/proto/BpoYZv1OJ8lTrTdjNNEg5O/Merlin-AI---Demo-(New)?node-id=1-42&starting-point-node-id=1%3A42&t=CMDrkvYDOXd6Tw7r-1&scaling=scale-down&content-scaling=fixed"
+      );
     }
   }
 
