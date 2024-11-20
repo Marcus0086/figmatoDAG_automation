@@ -1,14 +1,17 @@
-import FigmaFlow from "@/components/figma/figmaFlow";
+import ManualWorkflow from "@/components/manualWorkflow";
 import Browser from "@/components/browser";
+import DebugPanel from "@/components/debugPanel";
 
 const Home = () => {
   return (
-    <main className="p-4 flex lg:flex-row flex-col items-center gap-4 justify-center h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="flex flex-col items-center gap-4">
-        <h1 className="text-2xl font-bold">Figma Automation</h1>
-        <FigmaFlow />
+    <main className="flex flex-col gap-8">
+      <div className="flex gap-8 h-screen">
+        <div className="w-1/3 flex flex-col gap-8">
+          <ManualWorkflow />
+        </div>
+        <Browser />
       </div>
-      <Browser />
+      <DebugPanel />
     </main>
   );
 };
