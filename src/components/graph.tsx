@@ -17,77 +17,43 @@ import type { Graph } from "@/lib/graph";
 import useGraphNodes from "@/hooks/useGraphNodes";
 import useGraphEdges from "@/hooks/useGraphEdges";
 
+import dagre from "dagre";
+
 const GraphComponent = ({ graph }: { graph: Graph }) => {
   const { selection, setSelection } = useGraphStore();
 
-  const VERTICAL_SPACING = 150;
-  const HORIZONTAL_SPACING = 250;
+  const nodeWidth = 150;
+  const nodeHeight = 50;
 
-  // Helper to get node's children
-  const getChildren = (nodeId: string) =>
-    graph.edges
-      .filter((edge) => edge.sourceId === nodeId)
-      .map((edge) => edge.targetId);
+  // 1. Create a Dagre graph
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-  // Helper to get node's parents
-  const getParents = (nodeId: string) =>
-    graph.edges
-      .filter((edge) => edge.targetId === nodeId)
-      .map((edge) => edge.sourceId);
+  // Set the graph rank direction (TB, BT, LR, RL)
+  dagreGraph.setGraph({ rankdir: "TB", ranker: "tight-tree" }); // Change to "LR" for horizontal layout
 
-  // 1. Assign layers (y-coordinates)
-  const layers = new Map<string, number>();
-  const assignLayers = () => {
-    // Find root nodes (nodes with no parents)
-    const roots = Array.from(graph.nodes.keys()).filter(
-      (nodeId) => getParents(nodeId).length === 0
-    );
+  // 2. Add nodes and edges to Dagre graph
+  graph.nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
 
-    // Assign layer 0 to roots
-    roots.forEach((nodeId) => layers.set(nodeId, 0));
+  graph.edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.sourceId, edge.targetId);
+  });
 
-    // BFS to assign layers to all nodes
-    let currentNodes = [...roots];
-    let currentLayer = 1;
+  // 3. Run Dagre layout
+  dagre.layout(dagreGraph);
 
-    while (currentNodes.length > 0) {
-      const nextNodes: string[] = [];
-
-      currentNodes.forEach((nodeId) => {
-        const children = getChildren(nodeId);
-        children.forEach((childId) => {
-          if (!layers.has(childId)) {
-            layers.set(childId, currentLayer);
-            nextNodes.push(childId);
-          }
-        });
-      });
-
-      currentNodes = nextNodes;
-      currentLayer++;
-    }
-  };
-
-  // 2. Assign x-coordinates within each layer
+  // 4. Get positions from Dagre and update nodes
   const getNodePosition = (nodeId: string) => {
-    const layer = layers.get(nodeId) || 0;
-    const nodesInLayer = Array.from(layers.entries())
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .filter(([_, l]) => l === layer);
-
-    const indexInLayer = nodesInLayer.findIndex(([id]) => id === nodeId);
-    const layerWidth = nodesInLayer.length * HORIZONTAL_SPACING;
-    const startX = -layerWidth / 2;
-
+    const nodeWithPosition = dagreGraph.node(nodeId);
     return {
-      x: startX + indexInLayer * HORIZONTAL_SPACING,
-      y: layer * VERTICAL_SPACING,
+      x: nodeWithPosition.x - nodeWidth / 2,
+      y: nodeWithPosition.y - nodeHeight / 2,
     };
   };
 
-  // Execute layout algorithm
-  assignLayers();
-
+  // Use the positions from Dagre in your nodes
   const { nodes, onNodesChange } = useGraphNodes(graph, getNodePosition);
   const { edges, onEdgesChange, onConnect } = useGraphEdges(graph, selection);
 
