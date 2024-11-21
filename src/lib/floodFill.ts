@@ -1,4 +1,4 @@
-import { isRedFlash } from "./utils";
+import { isRedFlash } from "@/lib/imageProcessing";
 
 function floodFill(
   x: number,
