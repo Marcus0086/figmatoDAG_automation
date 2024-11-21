@@ -4,9 +4,9 @@ import DebugPanel from "@/components/debugPanel";
 
 const Home = () => {
   return (
-    <main className="flex flex-col gap-8">
-      <div className="flex gap-8 h-screen">
-        <div className="w-1/3 flex flex-col gap-8">
+    <main className="flex flex-col gap-6">
+      <div className="flex gap-6 h-screen">
+        <div className="w-1/3">
           <ManualWorkflow />
         </div>
         <Browser />
