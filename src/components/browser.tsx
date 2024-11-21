@@ -31,7 +31,7 @@ const Browser = () => {
           </span>
         </div>
       </div>
-      <div className="p-8 h-[calc(100%-5rem)]">
+      <div className="h-full">
         {iframeUrl && ENV !== "development" ? (
           <iframe
             src={iframeUrl}
