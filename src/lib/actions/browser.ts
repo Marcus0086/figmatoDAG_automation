@@ -68,7 +68,6 @@ async function manualTesting(journey: string) {
     throw new Error("Page not found");
   }
   const currentNodeId = uuidv4();
-
   await page.waitForSelector("canvas");
   await page.waitForTimeout(2000);
   await page.screenshot({
@@ -149,7 +148,6 @@ async function manualTesting(journey: string) {
   await sharp(path)
     .composite(
       validRectangles.map((rect) => {
-        // Round coordinates to integers
         const minX = Math.round(rect.minX);
         const minY = Math.round(rect.minY);
         const maxX = Math.round(rect.maxX);
@@ -162,8 +160,8 @@ async function manualTesting(journey: string) {
               maxY - minY
             }" fill="none" stroke="blue" stroke-width="2"/>
             <text x="${minX + 2}" y="${
-              minY - 5
-            }" fill="yellow" font-size="10" font-family="Arial" font-weight="bold">
+              minY - 2
+            }" fill="red" stroke="black" stroke-width="0.2" font-size="8" font-family="Arial" font-weight="bold">
               (${minX}, ${minY} to ${maxX}, ${maxY})
             </text>
           </svg>`
@@ -175,7 +173,15 @@ async function manualTesting(journey: string) {
     )
     .toFile(`public/images/manual/annotated_${currentNodeId}.png`);
 
-  const action = await imageToAction(journey, afterImage, validRectangles);
+  const annotatedImageBuffer = await sharp(
+    `public/images/manual/annotated_${currentNodeId}.png`
+  ).toBuffer();
+
+  const action = await imageToAction(
+    journey,
+    annotatedImageBuffer,
+    validRectangles
+  );
   if (action) {
     const { minX, minY, maxX, maxY } = action.boundingBox;
     await page.locator("canvas").click({
