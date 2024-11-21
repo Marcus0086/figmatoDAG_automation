@@ -15,13 +15,13 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 
-import { useActionStore } from "@/app/store/actionStore";
+// import { useActionStore } from "@/app/store/actionStore";
 
 import { manualTesting } from "@/lib/actions/browser";
 
 const ManualWorkflow = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { action, setAction } = useActionStore();
+  // const { action, setAction } = useActionStore();
   const [attributes, setAttributes] = useState({
     productFamiliarity: 0.5,
     patience: 0.5,
@@ -34,24 +34,22 @@ const ManualWorkflow = () => {
     try {
       const formData = new FormData(e.target as HTMLFormElement);
       const journey = formData.get("journey") as string;
-      // const title = formData.get("title") as string;
+      const title = formData.get("title") as string;
 
-      const response = await manualTesting(journey);
-      if (response.success && response.data) {
-        setAction([
-          ...action,
-          {
-            type: "manual",
-            data: {
-              action: response.data.action.action,
-              annotatedImage: response.data.annotatedImage,
-              flashImage: response.data.flashImage,
-              boundingBox: response.data.action.boundingBox,
-            },
-          },
-        ]);
-      } else {
-        console.error(response.error);
+      const response = await manualTesting(journey, title, attributes);
+      if (response.success) {
+        // setAction([
+        //   ...action,
+        //   {
+        //     type: "manual",
+        //     data: {
+        //       action: response.data.action.action,
+        //       annotatedImage: response.data.annotatedImage,
+        //       flashImage: response.data.flashImage,
+        //       boundingBox: response.data.action.boundingBox,
+        //     },
+        //   },
+        // ]);
       }
       (e.target as HTMLFormElement).reset();
     } catch (error) {
