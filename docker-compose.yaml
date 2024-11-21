@@ -1,6 +1,6 @@
 services:
   figmatodagautomation:
-    image: marcus18781xj/figmatodag:latest
+    build: .
     env_file:
       - .env
     ports:
