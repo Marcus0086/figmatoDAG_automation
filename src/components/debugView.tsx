@@ -91,6 +91,7 @@ const DebugView = () => {
                     src={entry.beforeImage}
                     alt="Before"
                     fill
+                    loading="lazy"
                     className="object-cover"
                   />
                 </div>
@@ -101,6 +102,7 @@ const DebugView = () => {
                     src={entry.annotatedImage}
                     alt="After"
                     fill
+                    loading="lazy"
                     className="object-cover"
                   />
                 </div>
