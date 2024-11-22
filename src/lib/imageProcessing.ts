@@ -2,6 +2,7 @@ import { Page } from "playwright";
 import sharp from "sharp";
 
 import floodFill from "@/lib/floodFill";
+import { uploadToS3 } from "@/lib/s3";
 
 const isRedFlash = (r: number, g: number, b: number, a: number) =>
   r > 150 && g < 80 && b < 80 && a > 128;
@@ -12,27 +13,22 @@ const processImage = async (
   index: number
 ) => {
   await page.locator("canvas").click({ position: { x: 198, y: 65 } });
-  await page.screenshot({
-    path: `public/images/manual/after_click_${currentNodeId}_${index}.png`,
+  const afterClickImageKey = `manual/after_click_${currentNodeId}_${index}.png`;
+  const afterClickImageBuffer = await page.screenshot({
     fullPage: true,
   });
-
+  await uploadToS3(afterClickImageBuffer, afterClickImageKey);
   // Process the image to detect red flash
-  const afterImage = await sharp(
-    `public/images/manual/after_click_${currentNodeId}_${index}.png`
-  )
-    .negate()
-    .toBuffer();
-  await sharp(afterImage).toFile(
-    `public/images/manual/after_click_negated_${currentNodeId}_${index}.png`
-  );
-  const path = `public/images/manual/after_click_negated_${currentNodeId}_${index}.png`;
-  const afterNegatedImage = sharp(path).ensureAlpha();
-  const { width, height } = await afterNegatedImage.metadata();
+  const afterImage = await sharp(afterClickImageBuffer).negate().toBuffer();
+  const afterNegatedImageBuffer = await sharp(afterImage).toBuffer();
+  const afterNegatedImageAlpha = sharp(afterNegatedImageBuffer).ensureAlpha();
+  const afterNegatedImageKey = `manual/after_negated_${currentNodeId}_${index}.png`;
+  await uploadToS3(afterNegatedImageBuffer, afterNegatedImageKey);
+  const { width, height } = await afterNegatedImageAlpha.metadata();
   if (!width || !height) {
     throw new Error("Failed to get image metadata");
   }
-  const imageData = await afterNegatedImage.raw().toBuffer();
+  const imageData = await afterNegatedImageAlpha.raw().toBuffer();
 
   const visited = Array.from({ length: height }, () =>
     Array(width).fill(false)
@@ -80,7 +76,7 @@ const processImage = async (
     }
   }
 
-  await sharp(path)
+  const annotatedImageBuffer = await sharp(afterNegatedImageBuffer)
     .composite(
       validRectangles.map((rect) => {
         const minX = Math.round(rect.minX);
@@ -106,11 +102,8 @@ const processImage = async (
         };
       })
     )
-    .toFile(`public/images/manual/annotated_${currentNodeId}_${index}.png`);
+    .toBuffer();
 
-  const annotatedImageBuffer = await sharp(
-    `public/images/manual/annotated_${currentNodeId}_${index}.png`
-  ).toBuffer();
   return { annotatedImageBuffer, validRectangles };
 };
 
