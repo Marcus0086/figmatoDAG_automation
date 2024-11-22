@@ -14,14 +14,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-
-// import { useActionStore } from "@/app/store/actionStore";
+import { useActionStore } from "@/app/store/actionStore";
 
 import { manualTesting } from "@/lib/actions/browser";
 
 const ManualWorkflow = () => {
   const [isLoading, setIsLoading] = useState(false);
-  // const { action, setAction } = useActionStore();
+  const { setAction, setSummary } = useActionStore();
   const [attributes, setAttributes] = useState({
     productFamiliarity: 0.5,
     patience: 0.5,
@@ -38,18 +37,26 @@ const ManualWorkflow = () => {
 
       const response = await manualTesting(journey, title, attributes);
       if (response.success) {
-        // setAction([
-        //   ...action,
-        //   {
-        //     type: "manual",
-        //     data: {
-        //       action: response.data.action.action,
-        //       annotatedImage: response.data.annotatedImage,
-        //       flashImage: response.data.flashImage,
-        //       boundingBox: response.data.action.boundingBox,
-        //     },
-        //   },
-        // ]);
+        // Transform the steps into action store format
+        const actions = response.stepsTaken.map((step) => ({
+          data: {
+            beforeImageUrl: step.beforeImageUrl,
+            annotatedImageUrl: step.annotatedImageUrl,
+            actionDescription: step.actionDescription,
+            rationale: step.rationale,
+            action: {
+              elementName: step.action.elementName,
+              boundingBox: step.action.boundingBox,
+            },
+          },
+        }));
+
+        // Add the summary as the last action
+        if (response.summary) {
+          setSummary(response.summary);
+        }
+
+        setAction(actions);
       }
       (e.target as HTMLFormElement).reset();
     } catch (error) {
@@ -177,4 +184,5 @@ const ManualWorkflow = () => {
     </div>
   );
 };
+
 export default ManualWorkflow;
