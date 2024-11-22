@@ -8,7 +8,7 @@ const SummaryView = () => {
   const { summary } = useActionStore();
 
   return (
-    <article className="prose prose-invert mx-auto min-w-full mt-6 p-6 rounded-lg border border-slate-700/20 bg-slate-900/20">
+    <article className="prose prose-2xl !text-3xl prose-invert mx-auto min-w-full mt-6 p-6 rounded-lg border border-slate-700/20 bg-slate-900/20">
       <ReactMarkdown
         components={{
           h1: ({ children }) => (
@@ -25,6 +25,11 @@ const SummaryView = () => {
             <h3 className="text-lg font-light text-slate-400 tracking-wide mt-4 mb-2">
               {children}
             </h3>
+          ),
+          h4: ({ children }) => (
+            <h4 className="text-base font-light text-slate-500 tracking-wide mt-3 mb-2">
+              {children}
+            </h4>
           ),
           p: ({ children }) => (
             <p className="text-slate-400 text-sm font-light tracking-wide mb-3">
