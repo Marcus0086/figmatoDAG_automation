@@ -10,7 +10,7 @@ RUN npm run build
 FROM node:22-slim AS runner
 
 ENV DEBIAN_FRONTEND=noninteractive TZ=America/New_York DISPLAY=:99 \
-    DISPLAY_NUM=99 GEOMETRY=1280x800 SCREEN_DPI=96
+    DISPLAY_NUM=99 GEOMETRY=1280x720 SCREEN_DPI=100
 
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
