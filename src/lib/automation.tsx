@@ -3,6 +3,9 @@ import { chromium, Browser, Page, BrowserContext } from "playwright";
 import { USER_AGENT, BROWSER_ARGS } from "@/lib/constants";
 import { Edge, Graph } from "@/lib/graph";
 
+const FigmaUrl =
+  "https://www.figma.com/proto/BpoYZv1OJ8lTrTdjNNEg5O/Merlin-AI---Demo-(New)?node-id=1-42&starting-point-node-id=1%3A42&t=CMDrkvYDOXd6Tw7r-1&scaling=scale-down-width&content-scaling=fixed";
+
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -20,6 +23,15 @@ class Automation {
   private page: Page | null = null;
 
   private constructor() {}
+
+  public async resetPage() {
+    if (!this.page) {
+      throw new Error("Page not initialized");
+    }
+    await this.page.goto(FigmaUrl);
+    await this.page.waitForSelector("canvas");
+    await this.page.waitForTimeout(2000);
+  }
 
   public static async getInstance(): Promise<Automation> {
     if (!Automation.instance) {
@@ -43,6 +55,7 @@ class Automation {
         timezoneId: "UTC",
         ignoreHTTPSErrors: true,
         permissions: ["geolocation", "notifications"],
+        viewport: { width: 1280, height: 720 },
       });
 
       // Add anti-detection script
@@ -56,9 +69,7 @@ class Automation {
 
       this.page = await this.context.newPage();
       this.page.setDefaultNavigationTimeout(60000);
-      await this.page.goto(
-        "https://www.figma.com/proto/BpoYZv1OJ8lTrTdjNNEg5O/Merlin-AI---Demo-(New)?node-id=1-42&starting-point-node-id=1%3A42&t=CMDrkvYDOXd6Tw7r-1&scaling=scale-down-width&content-scaling=fixed"
-      );
+      await this.page.goto(FigmaUrl);
     }
   }
 
