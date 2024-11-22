@@ -200,8 +200,9 @@ async function manualTesting(
     }
   }
 
+  await automation.resetPage();
+
   const summary = await generateSummary(stepsTaken, journey);
-  console.log("Summary", summary);
   return { success, stepsTaken, summary };
 }
 
