@@ -93,6 +93,7 @@ const DebugView = () => {
                     fill
                     loading="lazy"
                     className="object-cover"
+                    unoptimized
                   />
                 </div>
               </TableCell>
@@ -104,6 +105,7 @@ const DebugView = () => {
                     fill
                     loading="lazy"
                     className="object-cover"
+                    unoptimized
                   />
                 </div>
               </TableCell>
