@@ -6,11 +6,12 @@ import { Automation, AutomationError } from "@/lib/automation";
 import { Graph } from "@/lib/graph";
 import {
   imageToAction,
-  generateActionPlan,
+  generateNextAction,
   checkGoalAchieved,
   generateSummary,
 } from "@/lib/actions/ai";
 import { processImage } from "@/lib/imageProcessing";
+import { uploadToS3 } from "@/lib/s3";
 
 interface BrowserResponse {
   success: boolean;
@@ -79,87 +80,127 @@ async function manualTesting(
   if (!page) {
     throw new Error("Page not found");
   }
-  const currentNodeId = uuidv4();
+
   await page.waitForSelector("canvas");
   await page.waitForTimeout(2000);
-  // Initialize tracking variables
-  const stepsTaken = [];
-  let success = false;
-  const maxRetries = 5;
-  let retries = 0;
 
-  let actionPlan = await generateActionPlan(journey, title, attributes);
-  console.log("Action plan", actionPlan);
+  const maxRetries = 5;
+  const maxStepsPerAttempt = 10;
+  let retries = 0;
+  let success = false;
+  const stepsTaken = [];
   while (!success && retries < maxRetries) {
-    for (const [
-      index,
-      { actionDescription, rationale },
-    ] of actionPlan.entries()) {
+    retries++;
+
+    let stepsInCurrentAttempt = 0;
+    const currentNodeId = uuidv4();
+
+    // Get the canvas bounding box
+    const canvasBoundingBox = await page.locator("canvas").boundingBox();
+    if (!canvasBoundingBox) {
+      throw new Error("Canvas element not found");
+    }
+
+    while (stepsInCurrentAttempt < maxStepsPerAttempt) {
+      stepsInCurrentAttempt++;
+
+      // Capture the current state
+      const beforeClickImageBuffer = await page.screenshot({ fullPage: true });
+      const beforeImageKey = `manual/before_click_${currentNodeId}_${stepsInCurrentAttempt}.png`;
+      const beforeImageUrl = await uploadToS3(
+        beforeClickImageBuffer,
+        beforeImageKey
+      );
+
+      // Generate the next action
+      const { actionDescription, rationale } = await generateNextAction(
+        journey,
+        title,
+        attributes,
+        beforeImageUrl,
+        stepsTaken,
+        stepsTaken.length > 0
+          ? stepsTaken[stepsTaken.length - 1].actionDescription
+          : ""
+      );
+
       console.log("actionDescription", actionDescription);
-      const beforeClickImage = `public/images/manual/before_click_${currentNodeId}_${index}.png`;
-      await page.screenshot({
-        path: beforeClickImage,
-        fullPage: true,
-      });
+
+      // Process the image
       const { annotatedImageBuffer, validRectangles } = await processImage(
         page,
         currentNodeId,
-        index
+        stepsInCurrentAttempt
       );
 
+      const annotatedImageKey = `manual/annotated_${currentNodeId}_${stepsInCurrentAttempt}.png`;
+      const annotatedImageUrl = await uploadToS3(
+        annotatedImageBuffer,
+        annotatedImageKey
+      );
+
+      // Get the action bounding box
       const action = await imageToAction(
         actionDescription,
-        annotatedImageBuffer,
+        annotatedImageUrl,
         validRectangles
       );
+
       if (action && action.boundingBox) {
         const { minX, minY, maxX, maxY } = action.boundingBox;
-        await page.locator("canvas").click({
-          position: {
-            x: minX + (maxX - minX) / 2,
-            y: minY + (maxY - minY) / 2,
-          },
-        });
-        const step = {
-          step: index + 1,
+        const clickX = canvasBoundingBox.x + minX + (maxX - minX) / 2;
+        const clickY = canvasBoundingBox.y + minY + (maxY - minY) / 2;
+        await page.mouse.click(clickX, clickY);
+        await page.waitForTimeout(2000);
+
+        const step: {
+          step: number;
+          actionDescription: string;
+          action: {
+            elementName: string;
+            boundingBox: {
+              minX: number;
+              minY: number;
+              maxX: number;
+              maxY: number;
+            };
+          };
+          beforeImageUrl: string;
+          annotatedImageUrl: string;
+          rationale: string;
+        } = {
+          step: stepsInCurrentAttempt,
           actionDescription,
-          action,
-          beforeImagePath: beforeClickImage,
-          annotatedImagePath: `public/images/manual/annotated_${currentNodeId}_${index}.png`,
+          action: {
+            boundingBox: action.boundingBox,
+            elementName: action.elementName,
+          },
+          beforeImageUrl,
+          annotatedImageUrl,
           rationale,
         };
         stepsTaken.push(step);
 
         console.log("Taking step", step);
 
-        if (await checkGoalAchieved(page, journey)) {
+        // Check if the goal is achieved
+        const goalAchieved = await checkGoalAchieved(page, journey);
+        if (goalAchieved) {
           success = true;
           break;
         }
       } else {
-        console.warn(
-          "No action found for action and element name",
-          actionDescription,
-          action.elementName
-        );
+        console.warn("No valid action found.");
+        break; // Break the loop if no valid action is found
       }
     }
 
     if (!success) {
-      retries++;
-      // regenerate the action plan
-      console.log("Regenerating action plan");
-      actionPlan = await generateActionPlan(
-        journey,
-        title,
-        attributes,
-        stepsTaken
-      );
-      console.log("New action plan", actionPlan);
+      console.log("Goal not achieved in this attempt. Will retry.");
     }
   }
 
-  const summary = await generateSummary(stepsTaken);
+  const summary = await generateSummary(stepsTaken, journey);
   console.log("Summary", summary);
   return { success, stepsTaken, summary };
 }
