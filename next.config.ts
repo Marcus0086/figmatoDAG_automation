@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: process.env.IMAGE_HOST || "",
+        pathname: "/**",
+        port: "",
       },
     ],
   },
