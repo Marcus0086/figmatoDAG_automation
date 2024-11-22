@@ -4,8 +4,15 @@ import sharp from "sharp";
 import floodFill from "@/lib/floodFill";
 import { uploadToS3 } from "@/lib/s3";
 
-const isRedFlash = (r: number, g: number, b: number, a: number) =>
-  r > 150 && g < 80 && b < 80 && a > 128;
+const isRedFlash = (r: number, g: number, b: number, a: number) => {
+  // Thresholds for red and orange tones
+  const isRedOrOrange = r > 150 && g > 50 && g < 180 && b < 120;
+
+  // Allow low and high alpha values
+  const isAlphaVisible = a > 64; // Adjusted to allow partially transparent pixels
+
+  return isRedOrOrange && isAlphaVisible;
+};
 
 const processImage = async (
   page: Page,
