@@ -14,6 +14,7 @@ ENV DEBIAN_FRONTEND=noninteractive TZ=America/New_York DISPLAY=:99 \
 
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
+    libgl1-mesa-dri libgl1-mesa-glx \
     xvfb x11vnc websockify git wget procps \
     libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
     libcups2 libxkbcommon0 libatspi2.0-0 libgbm1 \
