@@ -202,7 +202,8 @@ For each section, provide:
 - Rating: Score out of 5
 - Top Issues: List up to 3 key problems identified
 - Recommendations: List up to 3 specific improvements
-Base your analysis only on the provided steps and screenshot, Focus on the static elements visible in the screenshot and how they adhere to the heuristics. Only use the screenshot and do not make assumptions about the website's functionality beyond what is visible.`,
+Base your analysis only on the provided steps and screenshot, Focus on the static elements visible in the screenshot and how they adhere to the heuristics. Only use the screenshot and do not make assumptions about the website's functionality beyond what is visible. 
+Don't add similar or redundant feedback`,
       },
       {
         role: "user",
