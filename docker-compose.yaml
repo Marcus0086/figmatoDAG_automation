@@ -1,6 +1,8 @@
 services:
   figmatodagautomation:
-    image: marcus18781xj/featurely_automator:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file:
       - .env
     ports:
@@ -8,6 +10,34 @@ services:
       - 3000:3000
     volumes:
       - figmatodagautomation:/app/public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mvp.rule=Host(`${HOST_URL}`)"
+      - "traefik.http.routers.mvp.entrypoints=websecure"
+      - "traefik.http.routers.mvp.tls.certresolver=myresolver"
+      - "traefik.http.services.mvp.loadbalancer.server.port=3000"
+      - "traefik.http.routers.vnc.rule=Host(`${VNC_HOST_URL}`)"
+      - "traefik.http.routers.vnc.entrypoints=websecure"
+      - "traefik.http.routers.vnc.tls.certresolver=myresolver"
+      - "traefik.http.services.vnc.loadbalancer.server.port=6080"
+
+  traefik:
+    image: traefik:v3.1.2
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=your-email@example.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "traefik_data:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 volumes:
+  traefik_data:
   figmatodagautomation:
     driver: local
