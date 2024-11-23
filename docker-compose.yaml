@@ -1,8 +1,6 @@
 services:
   figmatodagautomation:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: marcus18781xj/featurely_automator:latest
     env_file:
       - .env
     ports:
@@ -34,6 +32,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    env_file:
+      - .env
     volumes:
       - "traefik_data:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
