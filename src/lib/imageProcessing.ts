@@ -5,25 +5,27 @@ import floodFill from "@/lib/floodFill";
 import { uploadToS3 } from "@/lib/s3";
 
 const isRedFlash = (r: number, g: number, b: number, a: number) => {
-  // Define thresholds for very dark red tones like #290d00
+  const isDarkRedOrOrangeOrPink = r > 90 && g > 30 && g < 100 && b < 70; // Dark reddish-orange tones
+  const isDarkRed = r > 60 && r < 150 && g < 40 && b < 40; // Moderate red tones
+  const isMediumRedOrOrangeOrPink = r > 150 && g > 50 && g < 180 && b < 120; // Medium reddish-orange tones
   const isVeryDarkRed =
-    r >= 30 &&
-    r <= 60 && // Low to moderate red
-    g >= 0 &&
-    g <= 20 && // Very low green
-    b >= 0 &&
-    b <= 10; // Very low blue
+    r >= 30 && r <= 80 && g >= 0 && g <= 30 && b >= 0 && b <= 15; // Dark red tones
+  const isLightRedOrOrangeOrPink =
+    r > 200 && g > 120 && g < 210 && b > 120 && b < 200; // Light pinkish tones
+  const isLightBeigeOrPinkish =
+    r > 230 && g > 200 && g < 250 && b > 200 && b < 250; // Light beige tones
 
-  // Include other color ranges (bright red, orange, pink)
-  const isRedOrOrangeOrPink =
-    (r > 150 && g > 50 && g < 180 && b < 120) || // Bright red/orange tones
-    (r > 200 && g > 120 && b > 120 && g < 180 && b < 200); // Light pinkish tones
+  const isTransparentOrLowAlpha = a > 32; // Include semi-transparent pixels
 
-  // Semi-transparent or fully visible pixels
-  const isAlphaVisible = a > 20; // Include very low alpha for transparency
-
-  // Combine all conditions
-  return (isVeryDarkRed || isRedOrOrangeOrPink) && isAlphaVisible;
+  return (
+    (isDarkRedOrOrangeOrPink ||
+      isMediumRedOrOrangeOrPink ||
+      isDarkRed ||
+      isVeryDarkRed ||
+      isLightRedOrOrangeOrPink ||
+      isLightBeigeOrPinkish) &&
+    isTransparentOrLowAlpha
+  );
 };
 
 const processImage = async (
