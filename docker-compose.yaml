@@ -10,14 +10,16 @@ services:
       - figmatodagautomation:/app/public
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.mvp.rule=Host(`${HOST_URL}`)"
-      - "traefik.http.routers.mvp.entrypoints=websecure"
-      - "traefik.http.routers.mvp.tls.certresolver=myresolver"
-      - "traefik.http.services.mvp.loadbalancer.server.port=3000"
-      - "traefik.http.routers.vnc.rule=Host(`${VNC_HOST_URL}`)"
-      - "traefik.http.routers.vnc.entrypoints=websecure"
-      - "traefik.http.routers.vnc.tls.certresolver=myresolver"
-      - "traefik.http.services.vnc.loadbalancer.server.port=6080"
+      - "traefik.http.services.app-service.loadbalancer.server.port=3000"
+      - "traefik.http.routers.app-router.rule=Host(`${HOST_URL}`)"
+      - "traefik.http.routers.app-router.entrypoints=websecure"
+      - "traefik.http.routers.app-router.tls.certresolver=myresolver"
+      - "traefik.http.routers.app-router.service=app-service"
+      - "traefik.http.services.vnc-service.loadbalancer.server.port=6080"
+      - "traefik.http.routers.vnc-router.rule=Host(`${VNC_HOST_URL}`)"
+      - "traefik.http.routers.vnc-router.entrypoints=websecure"
+      - "traefik.http.routers.vnc-router.tls.certresolver=myresolver"
+      - "traefik.http.routers.vnc-router.service=vnc-service"
 
   traefik:
     image: traefik:v3.1.2
