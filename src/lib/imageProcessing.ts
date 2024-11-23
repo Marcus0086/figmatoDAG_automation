@@ -7,15 +7,26 @@ import { uploadToS3 } from "@/lib/s3";
 const isRedFlash = (r: number, g: number, b: number, a: number) => {
   // Define thresholds for dark, medium, and light tones
   const isDarkRedOrOrangeOrPink = r > 90 && g > 30 && g < 100 && b < 70; // Dark reddish-orange tones
+
   const isDarkRed =
     r > 60 &&
     r < 150 && // Moderate red levels
     g < 40 && // Very low green
     b < 40;
+
   const isMediumRedOrOrangeOrPink = r > 150 && g > 50 && g < 180 && b < 120; // Medium reddish-orange tones
 
   const isLightRedOrOrangeOrPink =
     r > 200 && g > 120 && g < 210 && b > 120 && b < 200; // Light pinkish tones
+
+  // New range for very dark reds like rgba(37,11,0,255)
+  const isVeryDarkRed =
+    r >= 20 &&
+    r <= 50 && // Very low red
+    g >= 0 &&
+    g <= 20 && // Very low green
+    b >= 0 &&
+    b <= 10; // Very low blue
 
   const isTransparentOrLowAlpha = a > 32; // Include semi-transparent pixels
 
@@ -24,7 +35,8 @@ const isRedFlash = (r: number, g: number, b: number, a: number) => {
     (isDarkRedOrOrangeOrPink ||
       isMediumRedOrOrangeOrPink ||
       isDarkRed ||
-      isLightRedOrOrangeOrPink) &&
+      isLightRedOrOrangeOrPink ||
+      isVeryDarkRed) && // Include very dark reds
     isTransparentOrLowAlpha
   );
 };
