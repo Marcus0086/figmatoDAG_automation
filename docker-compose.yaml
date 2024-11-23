@@ -1,6 +1,8 @@
 services:
   figmatodagautomation:
-    image: marcus18781xj/featurely_automator:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file:
       - .env
     ports:
