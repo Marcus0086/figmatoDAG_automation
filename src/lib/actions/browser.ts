@@ -84,8 +84,8 @@ async function manualTesting(
   await page.waitForSelector("canvas");
   await page.waitForTimeout(2000);
 
-  const maxRetries = 5;
-  const maxStepsPerAttempt = 10;
+  const maxRetries = 2;
+  const maxStepsPerAttempt = 8;
   let retries = 0;
   let success = false;
   const stepsTaken = [];
