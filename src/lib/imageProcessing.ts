@@ -5,13 +5,23 @@ import floodFill from "@/lib/floodFill";
 import { uploadToS3 } from "@/lib/s3";
 
 const isRedFlash = (r: number, g: number, b: number, a: number) => {
-  // Thresholds for red and orange tones
-  const isRedOrOrange = r > 150 && g > 50 && g < 180 && b < 120;
+  // Define thresholds for dark, medium, and light tones
+  const isDarkRedOrOrangeOrPink = r > 90 && g > 30 && g < 100 && b < 70; // Dark reddish-orange tones
 
-  // Allow low and high alpha values
-  const isAlphaVisible = a > 64; // Adjusted to allow partially transparent pixels
+  const isMediumRedOrOrangeOrPink = r > 150 && g > 50 && g < 180 && b < 120; // Medium reddish-orange tones
 
-  return isRedOrOrange && isAlphaVisible;
+  const isLightRedOrOrangeOrPink =
+    r > 200 && g > 120 && g < 210 && b > 120 && b < 200; // Light pinkish tones
+
+  const isTransparentOrLowAlpha = a > 32; // Include semi-transparent pixels
+
+  // Combine all conditions for detection
+  return (
+    (isDarkRedOrOrangeOrPink ||
+      isMediumRedOrOrangeOrPink ||
+      isLightRedOrOrangeOrPink) &&
+    isTransparentOrLowAlpha
+  );
 };
 
 const processImage = async (
