@@ -43,3 +43,10 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+tmp/*
+downloads/*
+letsencrypt/*
+# python
+*.pyc
+.DS_Store
+poetry.lock
