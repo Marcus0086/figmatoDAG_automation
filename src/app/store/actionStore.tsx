@@ -1,22 +1,20 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
-interface BoundingBox {
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
-}
-
-interface ActionData {
+import {
+  createContext,
+  useContext,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from "react";
+export interface ActionData {
+  timestamp: string;
+  step: number;
   beforeImageUrl: string;
   annotatedImageUrl: string;
   actionDescription: string;
+  actionInput: string[];
   rationale: string;
-  action: {
-    elementName: string;
-    boundingBox: BoundingBox | null;
-  };
 }
 
 interface Action {
@@ -24,10 +22,14 @@ interface Action {
 }
 
 interface ActionContextType {
-  action: Action[];
+  actions: Action[];
   summary: string;
-  setAction: (action: Action[]) => void;
-  setSummary: (summary: string) => void;
+  setActions: Dispatch<SetStateAction<Action[]>>;
+  setSummary: Dispatch<SetStateAction<string>>;
+  isGeneratingSummary: boolean;
+  setIsGeneratingSummary: Dispatch<SetStateAction<boolean>>;
+  isAnalyseModalOpen: boolean;
+  setIsAnalyseModalOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 const ActionContext = createContext<ActionContextType | undefined>(undefined);
@@ -41,15 +43,22 @@ export const useActionStore = () => {
 };
 
 export const ActionProvider = ({ children }: { children: React.ReactNode }) => {
-  const [action, setAction] = useState<Action[]>([]);
+  const [actions, setActions] = useState<Action[]>([]);
   const [summary, setSummary] = useState<string>("");
+  const [isGeneratingSummary, setIsGeneratingSummary] =
+    useState<boolean>(false);
+  const [isAnalyseModalOpen, setIsAnalyseModalOpen] = useState<boolean>(true);
   return (
     <ActionContext.Provider
       value={{
-        action,
-        setAction,
+        actions,
+        setActions,
         summary,
         setSummary,
+        isGeneratingSummary,
+        setIsGeneratingSummary,
+        isAnalyseModalOpen,
+        setIsAnalyseModalOpen,
       }}
     >
       {children}
