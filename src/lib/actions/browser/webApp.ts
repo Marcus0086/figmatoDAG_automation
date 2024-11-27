@@ -59,15 +59,7 @@ const startStagehand = async () => {
   return await webApp.init();
 };
 
-const webAppTesting = async (
-  journey: string,
-  title: string,
-  attributes: {
-    productFamiliarity: number;
-    patience: number;
-    techSavviness: number;
-  }
-) => {
+const webAppTesting = async (journey: string) => {
   const webApp = await WebApp.getInstance();
   const stagehand = webApp.stagehand;
   if (!stagehand) {
