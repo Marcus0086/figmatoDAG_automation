@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = ["Marcus0086 <guptamarcus42@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+langgraph = "^0.2.53"
+langchain = "^0.3.8"
+langchain-openai = "^0.2.9"
+fastapi = { extras = ["standard"], version = "^0.115.5" }
+uvicorn = { extras = ["standard"], version = "^0.32.1" }
+pydantic = "^2.10.1"
+pydantic-settings = "^2.6.1"
+playwright = "^1.49.0"
+botocore = "^1.35.70"
+boto3 = "^1.35.70"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
