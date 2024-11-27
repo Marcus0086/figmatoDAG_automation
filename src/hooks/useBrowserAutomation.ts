@@ -33,7 +33,8 @@ export function useBrowserAutomation() {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:8000/api/browser", {
+      const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
+      const response = await fetch(`${backendUrl}/api/browser`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

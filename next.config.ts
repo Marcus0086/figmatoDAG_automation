@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     BROWSER_VNC_URL: process.env.BROWSER_VNC_URL,
     LAMBDA_FUNCTION_URL: process.env.LAMBDA_FUNCTION_URL,
     IMAGE_HOST: process.env.IMAGE_HOST,
+    BACKEND_URL: process.env.BACKEND_URL,
   },
   images: {
     remotePatterns: [
