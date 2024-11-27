@@ -5,6 +5,56 @@ import { generateObject, generateText } from "ai";
 import { z } from "zod";
 import { Page } from "playwright";
 
+const journeyToActions = async (journey: string) => {
+  const { object } = await generateObject({
+    model: openai("gpt-4o-mini"),
+    schema: z.object({
+      actions: z.array(
+        z.object({
+          description: z.string(),
+        })
+      ),
+    }),
+    messages: [
+      {
+        role: "system",
+        content: `You are helping break down a user journey into its most basic components. 
+        Your task is to split compound actions into individual tasks WITHOUT making assumptions about specific UI elements or implementation details.
+        
+        Rules:
+        1. Keep actions at a high level - don't assume UI elements exist
+        2. Split compound tasks into separate actions
+        3. Don't add implementation details like "click button" or "open menu"
+        4. Keep the original wording from the journey where possible
+        
+        Examples:
+        Journey: "Enable dark mode and create new meeting with others"
+        Actions: [
+          { description: "Enable dark mode" },
+          { description: "Create new meeting with others" }
+        ]
+
+        Journey: "Create a new paper document and enter document body"
+        Actions: [
+          { description: "Create new paper document" },
+          { description: "Enter document body" }
+        ]
+
+        Journey: "Share document with team and add comments"
+        Actions: [
+          { description: "Share document with team" },
+          { description: "Add comments" }
+        ]`,
+      },
+      {
+        role: "user",
+        content: `Journey: ${journey}`,
+      },
+    ],
+  });
+  return object.actions;
+};
+
 const imageToAction = async (
   actionDescription: string,
   imageUrl: string,
@@ -237,4 +287,5 @@ export {
   generateNextAction,
   checkGoalAchieved,
   generateSummary,
+  journeyToActions,
 };
