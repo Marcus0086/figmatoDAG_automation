@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,13 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { useActionStore } from "@/app/store/actionStore";
-
-import { manualTesting } from "@/lib/actions/browser";
+import { useBrowserAutomation } from "@/hooks/useBrowserAutomation";
+import { toast } from "sonner";
 
 const ManualWorkflow = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { setAction, setSummary } = useActionStore();
+  const { runAutomation, isLoading, error } = useBrowserAutomation();
   const [attributes, setAttributes] = useState({
     productFamiliarity: 0.5,
     patience: 0.5,
@@ -29,42 +27,32 @@ const ManualWorkflow = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const journey = formData.get("journey") as string;
+    const title = formData.get("title") as string;
+
     try {
-      const formData = new FormData(e.target as HTMLFormElement);
-      const journey = formData.get("journey") as string;
-      const title = formData.get("title") as string;
+      await runAutomation({
+        journey,
+        title,
+        attributes,
+      });
 
-      const response = await manualTesting(journey, title, attributes);
-      if (response.success) {
-        // Transform the steps into action store format
-        const actions = response.stepsTaken.map((step) => ({
-          data: {
-            beforeImageUrl: step.beforeImageUrl,
-            annotatedImageUrl: step.annotatedImageUrl,
-            actionDescription: step.actionDescription,
-            rationale: step.rationale,
-            action: {
-              elementName: step.action.elementName,
-              boundingBox: step.action.boundingBox,
-            },
-          },
-        }));
-
-        // Add the summary as the last action
-        if (response.summary) {
-          setSummary(response.summary);
-        }
-
-        setAction(actions);
-      }
       (e.target as HTMLFormElement).reset();
     } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+      toast.error(
+        error instanceof Error ? error.message : "Unknown error occurred"
+      );
     }
   };
+
+  // Show error toast when error state changes
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   return (
     <div className="overflow-hidden h-full rounded-xl bg-gradient-to-b from-slate-800/50 via-slate-900/50 to-slate-950/50 backdrop-blur-xl border border-slate-700/10">
@@ -172,7 +160,8 @@ const ManualWorkflow = () => {
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Simulating...
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Simulating...
                 </>
               ) : (
                 "Simulate"
