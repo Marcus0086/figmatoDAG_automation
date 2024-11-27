@@ -1,22 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
 import { MonitorPlay } from "lucide-react";
 
-import { startBrowser } from "@/lib/actions/browser";
+// import { startStagehand } from "@/lib/actions/browser/webApp";
 import { BROWSER_VNC_URL, ENV } from "@/lib/constants";
 
 const Browser = () => {
   const iframeUrl = `${BROWSER_VNC_URL}/vnc.html?autoconnect=true&resize=remote&reconnect=true&quality=9`;
-  const [isBrowserStarted, setIsBrowserStarted] = useState(false);
+  // const [isBrowserStarted, setIsBrowserStarted] = useState(false);
 
-  useEffect(() => {
-    if (!isBrowserStarted) {
-      startBrowser().then((response) => {
-        if (response.success) setIsBrowserStarted(true);
-      });
-    }
-  }, [isBrowserStarted]);
+  // useEffect(() => {
+  //   if (!isBrowserStarted) {
+  //     startStagehand().then(() => {
+  //       setIsBrowserStarted(true);
+  //     });
+  //   }
+  // }, [isBrowserStarted]);
 
   return (
     <div className="flex-1 overflow-hidden rounded-xl bg-gradient-to-b from-slate-800/50 via-slate-900/50 to-slate-950/50 backdrop-blur-xl border border-slate-700/10">
