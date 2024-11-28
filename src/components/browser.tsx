@@ -1,25 +1,13 @@
 "use client";
 
-// import { useEffect, useState } from "react";
 import { MonitorPlay } from "lucide-react";
 
-// import { startStagehand } from "@/lib/actions/browser/webApp";
 import { BROWSER_VNC_URL, ENV } from "@/lib/constants";
 
 const Browser = () => {
-  const iframeUrl = `${BROWSER_VNC_URL}/vnc.html?autoconnect=true&resize=remote&reconnect=true&quality=9`;
-  // const [isBrowserStarted, setIsBrowserStarted] = useState(false);
-
-  // useEffect(() => {
-  //   if (!isBrowserStarted) {
-  //     startStagehand().then(() => {
-  //       setIsBrowserStarted(true);
-  //     });
-  //   }
-  // }, [isBrowserStarted]);
-
+  const iframeUrl = `${BROWSER_VNC_URL}/vnc.html?autoconnect=true&resize=scale&reconnect=true&quality=9`;
   return (
-    <div className="flex-1 overflow-hidden rounded-xl bg-gradient-to-b from-slate-800/50 via-slate-900/50 to-slate-950/50 backdrop-blur-xl border border-slate-700/10">
+    <div className="w-full h-screen lg:h-full overflow-hidden rounded-xl bg-gradient-to-b from-slate-800/50 via-slate-900/50 to-slate-950/50 backdrop-blur-xl border border-slate-700/10">
       <div className="px-8 py-6 border-b border-slate-800/10 bg-gradient-to-r from-slate-800/50 via-slate-900/50 to-transparent flex items-center justify-between">
         <h2 className="text-xl tracking-[0.15em] font-extralight text-slate-200 uppercase">
           Browser View
@@ -31,7 +19,7 @@ const Browser = () => {
           </span>
         </div>
       </div>
-      <div className="h-full">
+      <div className="h-full overflow-hidden bg-gradient-to-b from-slate-900/30 to-slate-950/30 rounded-lg border border-slate-700/20 shadow-lg">
         {iframeUrl && ENV !== "development" ? (
           <iframe
             src={iframeUrl}
