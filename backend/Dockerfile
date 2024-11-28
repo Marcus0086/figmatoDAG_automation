@@ -67,8 +67,9 @@ EXPOSE 8000 6080 5900
 # Set environment variables for display
 ENV DISPLAY=:99
 ENV DISPLAY_NUM=99
-ENV GEOMETRY=1280x800
+ENV GEOMETRY=1300x1024
 ENV SCREEN_DPI=96
+ENV KIOSK_MODE=true
 
 # Copy your application code into the container
 COPY . /app
