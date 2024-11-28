@@ -8,11 +8,18 @@ services:
       - 6080:6080
     labels:
       - "traefik.enable=true"
+      # VNC Service
       - "traefik.http.services.vnc-service.loadbalancer.server.port=6080"
       - "traefik.http.routers.vnc-router.rule=Host(`vnc.featurely.ai`)"
       - "traefik.http.routers.vnc-router.entrypoints=websecure"
       - "traefik.http.routers.vnc-router.tls.certresolver=myresolver"
       - "traefik.http.routers.vnc-router.service=vnc-service"
+      # API Service
+      - "traefik.http.services.api-service.loadbalancer.server.port=8000"
+      - "traefik.http.routers.api-router.rule=Host(`merlin.featurely.ai`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.api-router.entrypoints=websecure"
+      - "traefik.http.routers.api-router.tls.certresolver=myresolver"
+      - "traefik.http.routers.api-router.service=api-service"
 
   figmatodagautomation:
     image: marcus18781xj/featurely_automator:latest
@@ -25,7 +32,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.app-service.loadbalancer.server.port=3000"
-      - "traefik.http.routers.app-router.rule=Host(`merlin.featurely.ai`)"
+      - "traefik.http.routers.app-router.rule=Host(`merlin.featurely.ai`) && !PathPrefix(`/api`)"
       - "traefik.http.routers.app-router.entrypoints=websecure"
       - "traefik.http.routers.app-router.tls.certresolver=myresolver"
       - "traefik.http.routers.app-router.service=app-service"
