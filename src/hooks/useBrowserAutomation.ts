@@ -28,13 +28,33 @@ export function useBrowserAutomation() {
   const [error, setError] = useState<string | null>(null);
   const actionStore = useActionStore();
 
+  const setUrlHandler = async (url: string) => {
+    try {
+      const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
+      const response = await fetch(`${backendUrl}/api/browser/set-url`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      if (!response.ok) {
+        setError("Failed to set URL");
+      }
+      return response.json();
+    } catch (error) {
+      console.error("Error setting URL:", error);
+      setError(
+        error instanceof Error ? error.message : "Unknown error occurred"
+      );
+    }
+  };
+
   const runAutomation = async (request: BrowserRequest) => {
     setIsLoading(true);
     setError(null);
 
     try {
       const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
-      const response = await fetch(`${backendUrl}/api/browser`, {
+      const response = await fetch(`${backendUrl}/api/browser/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -110,5 +130,6 @@ export function useBrowserAutomation() {
     runAutomation,
     isLoading,
     error,
+    setUrlHandler,
   };
 }
