@@ -1,10 +1,17 @@
 services:
+  backend:
+    image: marcus18781xj/featurely_automator_backend:latest
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+      - 6080:6080
+
   figmatodagautomation:
     image: marcus18781xj/featurely_automator:latest
     env_file:
       - .env
     ports:
-      - 6080:6080
       - 3000:3000
     volumes:
       - figmatodagautomation:/app/public
