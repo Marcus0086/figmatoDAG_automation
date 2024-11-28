@@ -11,6 +11,9 @@ class Attributes(BaseModel):
 class BrowserRequest(BaseModel):
     query: str
     max_steps: Optional[int] = 150
-    url: Optional[str] = None
     title: Optional[str] = None
     attributes: Optional[Attributes] = None
+
+
+class SetUrlRequest(BaseModel):
+    url: str
