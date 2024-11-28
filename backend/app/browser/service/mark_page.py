@@ -26,13 +26,16 @@ async def mark_page(page: Page):
     for _ in range(10):
         try:
             bboxes = await page.evaluate("markPage()")
+            await asyncio.sleep(2)
             break
         except Exception:
             # May be loading...
             await asyncio.sleep(3)
     screenshot = await page.screenshot(quality=80, type="jpeg")
     # Ensure the bboxes don't follow us around
+    await asyncio.sleep(1)
     await page.evaluate("unmarkPage()")
+    await asyncio.sleep(2)
 
     before_annotated_img_url = await s3_client.upload_image(
         before_annotated_img, "manual", "before_annotated_img"
