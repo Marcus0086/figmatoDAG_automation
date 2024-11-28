@@ -8,6 +8,19 @@ from ..agent import summary_llm
 
 browser = Browser()
 
+async def set_url(url: str):
+    if browser.page is None:
+        return {
+            "success": False,
+            "message": "Browser not started",
+        }
+    await browser.page.goto(url)
+    await browser.page.wait_for_load_state("domcontentloaded")
+    return {
+        "success": True,
+        "message": "URL set successfully",
+    }
+
 
 async def stream_agent(
     data: BrowserRequest,
@@ -18,9 +31,6 @@ async def stream_agent(
         page = browser.page
         if page is None:
             yield "data: " + json.dumps({"error": "Failed to start browser"}) + "\n\n"
-        url = eval_data.get("url")
-        if url:
-            await page.goto(url)
         event_stream = graph.astream(
             {
                 "page": page,
