@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import Link from "next/link";
 import { GraphProvider } from "@/app/store/graphStore";
 import { ActionProvider } from "@/app/store/actionStore";
+import { AuthProvider } from "@/app/store/basicAuthProvider";
 
 import { Toaster } from "@/components/ui/sonner";
 
@@ -31,43 +32,45 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative
+      <AuthProvider>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased relative
         bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] 
         from-slate-900 via-gray-900 to-black min-h-screen h-full`}
-      >
-        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px]" />
-        <header className="border-b border-slate-800/20">
-          <div className="max-w-[2000px] mx-auto px-8 py-6 flex justify-between items-center">
-            <Link
-              href="/"
-              className="text-2xl tracking-[0.2em] font-extralight text-slate-200"
-            >
-              FEATURELY<span className="text-slate-600">.AI</span>
-            </Link>
-            <nav className="flex gap-8">
-              {["Platform", "Documentation", "Support"].map((item) => (
-                <Link
-                  key={item}
-                  href={`/${item.toLowerCase()}`}
-                  className="text-sm tracking-[0.15em] text-slate-400 hover:text-slate-200 
+        >
+          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px]" />
+          <header className="border-b border-slate-800/20">
+            <div className="max-w-[2000px] mx-auto px-8 py-6 flex justify-between items-center">
+              <Link
+                href="/"
+                className="text-2xl tracking-[0.2em] font-extralight text-slate-200"
+              >
+                FEATURELY<span className="text-slate-600">.AI</span>
+              </Link>
+              <nav className="flex gap-8">
+                {["Platform", "Documentation", "Support"].map((item) => (
+                  <Link
+                    key={item}
+                    href={`/${item.toLowerCase()}`}
+                    className="text-sm tracking-[0.15em] text-slate-400 hover:text-slate-200 
                            transition-colors uppercase font-light"
-                >
-                  {item}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </header>
-        <GraphProvider>
-          <ActionProvider>
-            <div className="relative max-w-[2000px] mx-auto px-8 py-10">
-              {children}
+                  >
+                    {item}
+                  </Link>
+                ))}
+              </nav>
             </div>
-          </ActionProvider>
-        </GraphProvider>
-        <Toaster />
-      </body>
+          </header>
+          <GraphProvider>
+            <ActionProvider>
+              <div className="relative max-w-[2000px] mx-auto px-8 py-10">
+                {children}
+              </div>
+            </ActionProvider>
+          </GraphProvider>
+          <Toaster />
+        </body>
+      </AuthProvider>
     </html>
   );
 }
