@@ -6,6 +6,13 @@ services:
     ports:
       - 8000:8000
       - 6080:6080
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.vnc-service.loadbalancer.server.port=6080"
+      - "traefik.http.routers.vnc-router.rule=Host(`vnc.featurely.ai`)"
+      - "traefik.http.routers.vnc-router.entrypoints=websecure"
+      - "traefik.http.routers.vnc-router.tls.certresolver=myresolver"
+      - "traefik.http.routers.vnc-router.service=vnc-service"
 
   figmatodagautomation:
     image: marcus18781xj/featurely_automator:latest
@@ -22,11 +29,6 @@ services:
       - "traefik.http.routers.app-router.entrypoints=websecure"
       - "traefik.http.routers.app-router.tls.certresolver=myresolver"
       - "traefik.http.routers.app-router.service=app-service"
-      - "traefik.http.services.vnc-service.loadbalancer.server.port=6080"
-      - "traefik.http.routers.vnc-router.rule=Host(`vnc.featurely.ai`)"
-      - "traefik.http.routers.vnc-router.entrypoints=websecure"
-      - "traefik.http.routers.vnc-router.tls.certresolver=myresolver"
-      - "traefik.http.routers.vnc-router.service=vnc-service"
 
   traefik:
     image: traefik:v3.1.2
