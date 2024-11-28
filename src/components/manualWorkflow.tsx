@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -18,12 +19,35 @@ import { useBrowserAutomation } from "@/hooks/useBrowserAutomation";
 import { toast } from "sonner";
 
 const ManualWorkflow = () => {
-  const { runAutomation, isLoading, error } = useBrowserAutomation();
+  const { runAutomation, setUrlHandler, isLoading, error } =
+    useBrowserAutomation();
+  const [url, setUrl] = useState("");
+  const [isUrlSet, setIsUrlSet] = useState(false);
+  const [isSettingUrl, setIsSettingUrl] = useState(false);
   const [attributes, setAttributes] = useState({
     productFamiliarity: 0.5,
     patience: 0.5,
     techSavviness: 0.5,
   });
+
+  const handleSetUrl = async () => {
+    if (!url) return;
+
+    setIsSettingUrl(true);
+    try {
+      const response = await setUrlHandler(url);
+      if (response.success) {
+        setIsUrlSet(true);
+        toast.success("URL set successfully");
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to set URL");
+    } finally {
+      setIsSettingUrl(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,7 +71,6 @@ const ManualWorkflow = () => {
     }
   };
 
-  // Show error toast when error state changes
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -55,17 +78,51 @@ const ManualWorkflow = () => {
   }, [error]);
 
   return (
-    <div className="overflow-hidden h-full rounded-xl bg-gradient-to-b from-slate-800/50 via-slate-900/50 to-slate-950/50 backdrop-blur-xl border border-slate-700/10">
+    <div className="h-full rounded-xl bg-gradient-to-b from-slate-800/50 via-slate-900/50 to-slate-950/50 backdrop-blur-xl border border-slate-700/10">
       <div className="px-8 py-6 border-b border-slate-800/10 bg-gradient-to-r from-slate-800/50 via-slate-900/50 to-transparent">
         <h2 className="text-xl tracking-[0.15em] font-extralight text-slate-200 uppercase">
           User Simulation
         </h2>
       </div>
       <div className="p-8">
+        {/* URL Input Section */}
+        <div className="mb-8 space-y-4">
+          <Label htmlFor="url" className="text-slate-400">
+            Target URL
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              id="url"
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="Enter website URL..."
+              className="flex-1 bg-slate-600/30 border-slate-700/20 text-slate-300
+                         placeholder:text-slate-400/80 focus:ring-slate-500
+                         focus:border-slate-500"
+            />
+            <Button
+              onClick={handleSetUrl}
+              disabled={!url || isSettingUrl}
+              className="bg-slate-700 hover:bg-slate-600 text-slate-200"
+            >
+              {isSettingUrl ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Setting...
+                </>
+              ) : (
+                "Set URL"
+              )}
+            </Button>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="relative group">
             <Textarea
               required
+              disabled={!isUrlSet}
               placeholder="Describe your journey..."
               name="journey"
               className="w-full min-h-[200px] bg-slate-600/30 border-slate-700/20 rounded-lg !text-lg
@@ -73,7 +130,8 @@ const ManualWorkflow = () => {
                          focus:ring-1 focus:ring-slate-500 focus:border-slate-500
                          tracking-wide font-light resize-none p-6
                          transition-all duration-300
-                         group-hover:border-slate-600/50"
+                         group-hover:border-slate-600/50
+                         disabled:opacity-50 disabled:cursor-not-allowed"
               rows={10}
             />
           </div>
@@ -83,11 +141,11 @@ const ManualWorkflow = () => {
               User Attributes
             </h2>
             <div className="w-full">
-              <Label htmlFor="title" className="text-slate-400 mb-2 block ">
+              <Label htmlFor="title" className="text-slate-400 mb-2 block">
                 Title
               </Label>
-              <Select name="title" required>
-                <SelectTrigger className="w-full bg-slate-600/30 border-slate-700/20 text-slate-300 focus:ring-slate-500 focus:ring-1">
+              <Select name="title" required disabled={!isUrlSet}>
+                <SelectTrigger className="w-full bg-slate-600/30 border-slate-700/20 text-slate-300 focus:ring-slate-500 focus:ring-1 disabled:opacity-50">
                   <SelectValue
                     placeholder="Select a title"
                     className="text-slate-400"
@@ -122,7 +180,8 @@ const ManualWorkflow = () => {
                     <span className="text-slate-500 text-sm">Low</span>
                     <div className="flex-1 relative">
                       <Slider
-                        className="cursor-grab"
+                        disabled={!isUrlSet}
+                        className="cursor-grab disabled:opacity-50 disabled:cursor-not-allowed"
                         value={[attributes[key as keyof typeof attributes]]}
                         onValueChange={(value) =>
                           setAttributes((prev) => ({
@@ -156,7 +215,7 @@ const ManualWorkflow = () => {
                          disabled:opacity-50 disabled:cursor-not-allowed
                          shadow-lg hover:shadow-xl"
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !isUrlSet}
             >
               {isLoading ? (
                 <>
