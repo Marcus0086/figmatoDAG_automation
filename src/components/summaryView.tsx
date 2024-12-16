@@ -4,8 +4,8 @@ import ReactMarkdown from "react-markdown";
 
 import { useActionStore } from "@/app/store/actionStore";
 
-const SummaryView = () => {
-  const { summary } = useActionStore();
+const SummaryView = ({ summary }: { summary?: string }) => {
+  const { summary: actionsSummary } = useActionStore();
 
   return (
     <article className="prose prose-2xl !text-3xl prose-invert mx-auto min-w-full mt-6 p-6 rounded-lg border border-slate-700/20 bg-slate-900/20">
@@ -59,7 +59,7 @@ const SummaryView = () => {
           ),
         }}
       >
-        {summary}
+        {summary || actionsSummary}
       </ReactMarkdown>
     </article>
   );
