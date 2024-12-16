@@ -31,7 +31,7 @@ class S3Client:
             # Generate unique filename with timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
             prefix = f"{prefix}_" if prefix else ""
-            key = f"{subfolder}/{prefix}{timestamp}.jpeg"
+            key = f"{subfolder}/{prefix}{timestamp}.png"
 
             # Upload to S3
             self.s3.upload_fileobj(
@@ -39,7 +39,7 @@ class S3Client:
                 self.bucket,
                 key,
                 ExtraArgs={
-                    "ContentType": "image/jpeg",
+                    "ContentType": "image/png",
                 },
             )
 
