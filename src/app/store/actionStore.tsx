@@ -15,6 +15,7 @@ export interface ActionData {
   actionDescription: string;
   actionInput: string[];
   rationale: string;
+  ux_law_summary: string;
 }
 
 interface Action {
@@ -30,6 +31,7 @@ interface ActionContextType {
   setIsGeneratingSummary: Dispatch<SetStateAction<boolean>>;
   isAnalyseModalOpen: boolean;
   setIsAnalyseModalOpen: Dispatch<SetStateAction<boolean>>;
+  resetState: () => void;
 }
 
 const ActionContext = createContext<ActionContextType | undefined>(undefined);
@@ -48,6 +50,13 @@ export const ActionProvider = ({ children }: { children: React.ReactNode }) => {
   const [isGeneratingSummary, setIsGeneratingSummary] =
     useState<boolean>(false);
   const [isAnalyseModalOpen, setIsAnalyseModalOpen] = useState<boolean>(true);
+
+  const resetState = () => {
+    setActions([]);
+    setSummary("");
+    setIsGeneratingSummary(false);
+    setIsAnalyseModalOpen(true);
+  };
   return (
     <ActionContext.Provider
       value={{
@@ -59,6 +68,7 @@ export const ActionProvider = ({ children }: { children: React.ReactNode }) => {
         setIsGeneratingSummary,
         isAnalyseModalOpen,
         setIsAnalyseModalOpen,
+        resetState,
       }}
     >
       {children}
