@@ -1,14 +1,24 @@
+import os
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .browser.router import router as browser_router
 from .browser.main import Browser
+from .config.config import get_settings
 
+settings = get_settings()
 browser = Browser()
 
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_ENDPOINT"] = settings.LANGCHAIN_ENDPOINT
+os.environ["LANGCHAIN_API_KEY"] = settings.LANGCHAIN_API_KEY
+os.environ["LANGCHAIN_PROJECT"] = settings.LANGCHAIN_PROJECT
+
+
 @asynccontextmanager
-async def browser_lifecycle (app: FastAPI):
+async def browser_lifecycle(app: FastAPI):
     """
     Asynchronous context manager that manages the browser lifecycle.
 
@@ -17,8 +27,10 @@ async def browser_lifecycle (app: FastAPI):
     Args:
         app (FastAPI): The FastAPI application instance.
     """
-    
-    await browser.start_browser()
+
+    await browser.start_browser(
+        browser_ws_endpoint="ws://0.0.0.0:3000/playwright/chromium?headless=false&stealth=true"
+    )
     try:
         # This `yield` allows the app to run while keeping the browser open
         yield
@@ -38,7 +50,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 
 app.include_router(router=browser_router, prefix="/api", tags=["browser"])
