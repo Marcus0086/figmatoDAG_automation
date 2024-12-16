@@ -5,10 +5,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     env: str = "development"
     openai_api_key: str = ""
+    anthropic_api_key: str = ""
     aws_access_key_id: str = ""
     aws_secret_access_key: str = ""
     aws_region: str = ""
     aws_s3_bucket: str = ""
+    LANGCHAIN_ENDPOINT: str = ""
+    LANGCHAIN_API_KEY: str = ""
+    LANGCHAIN_PROJECT: str = ""
     model_config = SettingsConfigDict(env_file="../.env", extra="allow")
 
 
