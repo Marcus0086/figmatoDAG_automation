@@ -63,12 +63,21 @@ function getUniqueSelector(element) {
 
   return path.join(" > ");
 }
+// ... existing code ...
+
+// Function to get text content from pseudo-elements
+function getPseudoElementContent(element, pseudo) {
+  const style = window.getComputedStyle(element, pseudo);
+  const content = style.getPropertyValue("content");
+  // Remove quotes around the content if present
+  return content && content !== "none" ? content.replace(/['"]/g, "") : "";
+}
 
 // Function to mark the page with visible and clickable elements
 function markPage() {
   unmarkPage();
 
-  var items = Array.from(document.querySelectorAll("*"))
+  let items = Array.from(document.querySelectorAll("*"))
     .map((element) => {
       const vw = Math.max(
         document.documentElement.clientWidth || 0,
@@ -79,12 +88,63 @@ function markPage() {
         window.innerHeight || 0
       );
 
-      function getElementText(el) {
+      function getElementText(el, depth = 0) {
+        if (depth > 5) { // Example depth limit
+          return "";
+        }
+
         let text = el.textContent.trim().replace(/\s{2,}/g, " ");
         let ariaLabel = el.getAttribute("aria-label") || "";
         let placeholder = el.getAttribute("placeholder") || "";
         let value = el.value || "";
         let title = el.getAttribute("title") || "";
+
+        // Get content from pseudo-elements
+        const beforeContent = getPseudoElementContent(el, "::before");
+        const afterContent = getPseudoElementContent(el, "::after");
+
+        // Combine all possible text sources
+        const combinedText = [
+          beforeContent,
+          text,
+          afterContent,
+          ariaLabel,
+          placeholder,
+          value,
+          title,
+        ]
+          .filter(Boolean)
+          .join(" ");
+
+        // Enhanced SVG and span detection
+        if (
+          el.tagName.toLowerCase() === "svg" ||
+          el.tagName.toLowerCase() === "span" ||
+          el.tagName.toLowerCase() === "path" ||
+          el.querySelector("svg")
+        ) {
+          const possibleName = ariaLabel || title || el.getAttribute("name");
+          const parentText =
+            el.parentElement?.getAttribute("aria-label") ||
+            el.parentElement?.title ||
+            el.parentElement?.parentElement?.getAttribute("aria-label");
+          const elementText = combinedText || parentText || possibleName;
+
+          if (elementText) {
+            return `${elementText}${
+              el.tagName.toLowerCase() === "svg" ? " icon" : ""
+            }`;
+          }
+
+          const closestElement = el.closest("button, a, nav, header, footer");
+          const context = closestElement
+            ? getElementText(closestElement, depth + 1)
+            : "Interactive";
+
+          return `${context}${
+            el.tagName.toLowerCase() === "svg" ? " icon" : " element"
+          }`;
+        }
 
         if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
           return (
@@ -92,13 +152,13 @@ function markPage() {
             value ||
             ariaLabel ||
             title ||
-            text ||
+            combinedText ||
             el.name ||
             el.type
           );
         }
         if (el.tagName === "BUTTON") {
-          return text || ariaLabel || title || el.value || el.name;
+          return combinedText || ariaLabel || title || el.value || el.name;
         }
         if (el.tagName === "SELECT") {
           let selectedOption = el.options[el.selectedIndex];
@@ -106,7 +166,7 @@ function markPage() {
             ? selectedOption.text
             : placeholder || ariaLabel || title || el.name;
         }
-        return text || ariaLabel || title;
+        return combinedText || ariaLabel || title;
       }
 
       const rects = [...element.getClientRects()]
@@ -135,26 +195,30 @@ function markPage() {
         (acc, rect) => acc + rect.width * rect.height,
         0
       );
-      const textualContent = getElementText(element);
+      const textualContent = getElementText(element, 0);
 
       return {
         element: element,
         include:
           isVisible(element) &&
+          element.tagName !== "HTML" && // Exclude HTML
+          element.tagName !== "BODY" &&
           (element.tagName === "INPUT" ||
             element.tagName === "TEXTAREA" ||
             element.tagName === "SELECT" ||
             element.tagName === "BUTTON" ||
             element.tagName === "A" ||
+            element.tagName === "INPUT" ||
             element.onclick != null ||
             window.getComputedStyle(element).cursor === "pointer" ||
+            window.getComputedStyle(element).cursor === "text" ||
             element.tagName === "IFRAME" ||
             element.tagName === "VIDEO") &&
           (textualContent.length > 0 ||
             element.getAttribute("aria-label") ||
             element.getAttribute("placeholder") ||
             element.value ||
-            (element.tagName === "INPUT" && element.type !== "hidden")),
+            element.type !== "hidden"),
         area,
         rects,
         text: textualContent,
@@ -165,7 +229,7 @@ function markPage() {
     .filter((item) => item.include && item.area >= 20);
 
   items = items.filter(
-    (x) => !items.some((y) => x.element.contains(y.element) && !(x == y))
+    (x) => !items.some((y) => x.element.contains(y.element) && x !== y)
   );
 
   // Generate random colors for borders
@@ -184,7 +248,7 @@ function markPage() {
       const borderElement = document.createElement("div");
       const borderColor = getRandomColor();
 
-      borderElement.style.outline = `2px dashed ${borderColor}`;
+      borderElement.style.outline = `1px dashed ${borderColor}`;
       borderElement.style.position = "fixed";
       borderElement.style.left = bbox.left + "px";
       borderElement.style.top = bbox.top + "px";
@@ -197,13 +261,16 @@ function markPage() {
       const label = document.createElement("span");
       label.textContent = index;
       label.style.position = "absolute";
-      label.style.top = "-19px";
+      label.style.top = "-12px";
       label.style.left = "0px";
       label.style.background = borderColor;
       label.style.color = "white";
-      label.style.padding = "2px 4px";
-      label.style.fontSize = "12px";
+      label.style.padding = "1px 3px";
+      label.style.fontSize = "10px";
       label.style.borderRadius = "2px";
+      label.style.fontWeight = "bold";
+      label.style.lineHeight = "1"; // Added to keep it compact
+      label.style.zIndex = "2147483647";
       borderElement.appendChild(label);
 
       document.body.appendChild(borderElement);
