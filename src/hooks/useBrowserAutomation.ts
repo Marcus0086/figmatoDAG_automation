@@ -1,14 +1,20 @@
-import { useActionStore } from "@/app/store/actionStore";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
+import { useActionStore } from "@/app/store/actionStore";
 interface BrowserRequest {
   journey: string;
   title: string;
   url?: string;
   attributes: {
-    productFamiliarity: number;
+    productFamiliarity: string;
     patience: number;
-    techSavviness: number;
+    techSavviness: string;
+    domainFamiliarity: string;
+    industryExpertise: string;
+  };
+  groundTruth: {
+    img?: string;
+    description?: string;
   };
 }
 
@@ -21,20 +27,24 @@ interface StreamResponse {
   rationale?: string;
   before_annotated_img?: string;
   img?: string;
+  ux_law_summary?: string;
 }
 
 export function useBrowserAutomation() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const actionStore = useActionStore();
+   const abortControllerRef = useRef<AbortController | null>(null);
 
   const setUrlHandler = async (url: string) => {
+    abortControllerRef.current = new AbortController();
     try {
       const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
       const response = await fetch(`${backendUrl}/api/browser/set-url`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
+        signal: abortControllerRef.current.signal
       });
       if (!response.ok) {
         setError("Failed to set URL");
@@ -49,9 +59,10 @@ export function useBrowserAutomation() {
   };
 
   const runAutomation = async (request: BrowserRequest) => {
+    abortControllerRef.current = new AbortController();
     setIsLoading(true);
     setError(null);
-
+    actionStore.resetState();
     try {
       const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
       const response = await fetch(`${backendUrl}/api/browser/run`, {
@@ -63,7 +74,9 @@ export function useBrowserAutomation() {
           title: request.title,
           url: request.url,
           attributes: request.attributes,
+          ground_truth: request.groundTruth,
         }),
+        signal: abortControllerRef.current.signal
       });
 
       if (!response.ok || !response.body) {
@@ -105,6 +118,7 @@ export function useBrowserAutomation() {
                       }`,
                       rationale: data.rationale || "",
                       actionInput: data.action_input || [],
+                      ux_law_summary: data.ux_law_summary || ""
                     },
                   },
                 ]);
@@ -126,10 +140,17 @@ export function useBrowserAutomation() {
     }
   };
 
+  const cancelAutomation = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  };
+
   return {
     runAutomation,
     isLoading,
     error,
     setUrlHandler,
+    cancelAutomation
   };
 }
