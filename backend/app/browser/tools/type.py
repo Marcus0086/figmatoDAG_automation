@@ -1,6 +1,7 @@
 import platform
 
 from ..graph.state import AgentState
+from ..service.mark_page import mark_page
 
 
 async def type_text(state: AgentState):
@@ -15,13 +16,22 @@ async def type_text(state: AgentState):
     bbox_id = int(bbox_id)
     bbox = state["bboxes"][bbox_id]
     element = bbox["text"]
-    x, y = bbox["x"], bbox["y"]
+    selector = bbox["selector"]
     text_content = type_args[1]
-    await page.mouse.click(x, y)
+    await page.click(selector=selector)
     # Check if MacOS
     select_all = "Meta+A" if platform.system() == "Darwin" else "Control+A"
     await page.keyboard.press(select_all)
     await page.keyboard.press("Backspace")
     await page.keyboard.type(text_content)
     await page.keyboard.press("Enter")
-    return {"observation": f"I am typing {text_content} and submitting into {element}"}
+
+    await page.wait_for_timeout(2000)
+    await page.keyboard.press("Tab")
+    await page.keyboard.press("Tab")
+
+    marked_page = await mark_page.with_retry().ainvoke(state["page"])
+    return {
+        "observation": f"I have typed {text_content} and submitted into {element}",
+        **marked_page,
+    }
