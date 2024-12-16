@@ -1,4 +1,5 @@
 from ..graph.state import AgentState
+from ..service.mark_page import mark_page
 
 
 async def click(state: AgentState):
@@ -16,9 +17,8 @@ async def click(state: AgentState):
         element = bbox["text"]
     except Exception:
         return {"observation": f"Error: no bbox for {element} ({bbox_id})"}
-    x, y = bbox["x"], bbox["y"]
-    await page.mouse.click(x, y)
-    # TODO: In the paper, they automatically parse any downloaded PDFs
-    # We could add something similar here as well and generally
-    # improve response format.
-    return {"observation": f"I am clicking {bbox_id} on {element}"}
+    selector = bbox.get("selector", "")
+    await page.click(selector=selector)
+    await page.wait_for_timeout(2000)
+    marked_page = await mark_page.with_retry().ainvoke(state["page"])
+    return {"observation": f"I have clicked on {element} ({bbox_id})", **marked_page}
