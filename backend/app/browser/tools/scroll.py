@@ -31,5 +31,5 @@ async def scroll(state: AgentState):
         await page.mouse.wheel(0, scroll_direction)
 
     return {
-        "observation": f"I am scrolling {direction} in {'window' if target.upper() == 'WINDOW' else element}"
+        "observation": f"I have scrolled {direction} in {'window' if target.upper() == 'WINDOW' else element}"
     }
