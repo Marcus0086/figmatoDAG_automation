@@ -107,3 +107,6 @@ docker compose up --build -d
    - Capture screenshots
 3. Real-time interaction feedback is visible through the noVNC iframe
 4. Screenshots are automatically captured and stored after each state change
+
+
+## TODO
