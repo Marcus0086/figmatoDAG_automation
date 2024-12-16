@@ -1,6 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import {
   Table,
@@ -10,7 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+
 import { useActionStore } from "@/app/store/actionStore";
+import SummaryView from "./summaryView";
 
 const DebugView = ({
   onTabChange,
@@ -24,6 +35,10 @@ const DebugView = ({
     isAnalyseModalOpen,
     setIsAnalyseModalOpen,
   } = useActionStore();
+
+  const [selectedUxSummary, setSelectedUxSummary] = useState<string | null>(
+    null
+  );
 
   return (
     <div className="mt-6 rounded-lg border border-slate-700/20 bg-slate-900/20 max-h-[600px] overflow-auto relative">
@@ -102,6 +117,21 @@ const DebugView = ({
         <></>
       )}
 
+      <Dialog
+        open={!!selectedUxSummary}
+        onOpenChange={() => setSelectedUxSummary(null)}
+      >
+        <DialogContent className="max-w-4xl h-[90vh] bg-slate-800 border border-slate-700/30">
+          <DialogHeader className="border-b border-slate-700/30">
+            <DialogTitle className="text-xl font-semibold text-slate-200">
+              UX Analysis Summary
+            </DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto pr-2 text-slate-300">
+            <SummaryView summary={selectedUxSummary || ""} />
+          </div>
+        </DialogContent>
+      </Dialog>
       <Table>
         <TableHeader className="sticky top-0 bg-slate-900/90 backdrop-blur-sm z-10">
           <TableRow className="hover:bg-slate-800/50 border-slate-700/20">
@@ -162,9 +192,23 @@ const DebugView = ({
                 </div>
               </TableCell>
               <TableCell>
-                <p className="text-sm text-slate-300 font-light">
-                  {entry.data.actionDescription}
-                </p>
+                <div className="flex items-center justify-center flex-col gap-2">
+                  <p className="text-sm text-slate-300 font-light">
+                    {entry.data.actionDescription}
+                  </p>
+                  {entry.data.ux_law_summary && (
+                    <Button
+                      variant="ghost"
+                      size="default"
+                      onClick={() =>
+                        setSelectedUxSummary(entry.data.ux_law_summary)
+                      }
+                      className="px-4 py-2 bg-slate-700 hover:bg-slate-600 transition-colors rounded-md text-slate-200 hover:text-slate-300 text-sm"
+                    >
+                      View UX Analysis
+                    </Button>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 <p className="text-sm text-slate-400 font-light italic">
